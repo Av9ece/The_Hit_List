@@ -4,12 +4,13 @@ import ToDoList from "./ToDoList";
 
 function App() {
   return (
-     
-      <div className="App bg-gray-100 min-h-screen">
+    <div className="App bg-gray-100 min-h-screen">
+      <main>
         <ToDoList />
-      </div>
-   );
-  
+      </main>
+    </div>
+  );
 }
 
 export default App;
+
