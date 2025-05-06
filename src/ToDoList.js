@@ -4,38 +4,53 @@ function ToDoList() {
   const [tasks, setTasks] = useState([]);
   const [input, setInput] = useState('');
 
-  // Load tasks from localStorage when the component mounts
+  // Load tasks from localStorage on initial mount
   useEffect(() => {
     const storedTasks = localStorage.getItem('tasks');
     if (storedTasks) {
-      setTasks(JSON.parse(storedTasks));
+      try {
+        const parsed = JSON.parse(storedTasks);
+        if (Array.isArray(parsed)) {
+          setTasks(parsed);
+        }
+      } catch (error) {
+        console.error('Error parsing tasks from localStorage:', error);
+      }
     }
   }, []);
 
-  // Save tasks to localStorage whenever the tasks state changes
+  // Save tasks to localStorage whenever tasks change
   useEffect(() => {
     if (tasks.length > 0) {
       localStorage.setItem('tasks', JSON.stringify(tasks));
     }
   }, [tasks]);
 
-  // Add a new task
+  // Add a task
   const addTask = () => {
-    if (!input.trim()) return;
-    setTasks([...tasks, input.trim()]);
+    const trimmed = input.trim();
+    if (!trimmed) return;
+    setTasks([...tasks, { text: trimmed, done: false }]);
     setInput('');
   };
 
-  // Remove a task by index
+  // Remove a task
   const removeTask = (index) => {
     const updatedTasks = tasks.filter((_, i) => i !== index);
+    setTasks(updatedTasks);
+  };
+
+  // Toggle done/undone
+  const toggleDone = (index) => {
+    const updatedTasks = [...tasks];
+    updatedTasks[index].done = !updatedTasks[index].done;
     setTasks(updatedTasks);
   };
 
   return (
     <div className="p-4 max-w-md mx-auto mt-10 bg-white rounded-xl shadow-md">
       <h2 className="text-xl font-bold mb-4">📝 To-Do List</h2>
-      
+
       <div className="flex mb-4">
         <input
           className="border rounded-l px-3 py-2 w-full"
@@ -50,14 +65,26 @@ function ToDoList() {
           Add
         </button>
       </div>
-      
+
       <ul className="list-disc pl-5 space-y-2">
         {tasks.map((task, index) => (
-          <li key={index} className="flex justify-between items-center bg-gray-100 px-3 py-2 rounded">
-            <span>{task}</span>
+          <li
+            key={index}
+            className={`flex justify-between items-center px-3 py-2 rounded cursor-pointer ${
+              task.done ? 'bg-green-100 text-gray-500 line-through' : 'bg-gray-100 text-black'
+            }`}
+          >
+            <span
+              onClick={() => toggleDone(index)}
+              className="w-full"
+              title="Click to mark as done"
+            >
+              {task.text}
+            </span>
             <button
               onClick={() => removeTask(index)}
-              className="text-red-500 hover:text-red-700 font-bold"
+              className="text-red-500 hover:text-red-700 font-bold ml-4"
+              aria-label={`Delete task ${index + 1}`}
             >
               ✕
             </button>
